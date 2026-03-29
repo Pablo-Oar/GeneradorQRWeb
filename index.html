@@ -11,6 +11,7 @@
 * {
     box-sizing: border-box;
 }
+
 body {
     font-family: Arial;
     background: #f4f4f4;
@@ -18,28 +19,36 @@ body {
     padding: 20px;
 }
 
-/* Contenedor principal */
 .container {
     max-width: 500px;
     margin: auto;
     text-align: center;
 }
 
-/* Input */
-input {
+input, select {
     width: 100%;
     padding: 12px;
     font-size: 16px;
     margin-bottom: 10px;
 }
 
-/* Botones */
+.color-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.color-group input {
+    flex: 1;
+    height: 45px;
+    padding: 0;
+}
+
 .buttons {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 button {
@@ -50,14 +59,12 @@ button {
     cursor: pointer;
 }
 
-/* QR */
 #qrcode {
     margin-top: 20px;
     display: flex;
     justify-content: center;
 }
 
-/* Responsive */
 @media (max-width: 480px) {
     h2 {
         font-size: 20px;
@@ -65,7 +72,6 @@ button {
 
     button {
         font-size: 14px;
-        padding: 10px;
     }
 }
 </style>
@@ -78,6 +84,16 @@ button {
 
     <input type="text" id="texto" placeholder="Ingresá texto o URL">
 
+    <div class="color-group">
+        <input type="color" id="colorQR" value="#000000" title="Color QR">
+        <input type="color" id="colorFondo" value="#ffffff" title="Color fondo">
+    </div>
+
+    <select id="formato">
+        <option value="png">PNG</option>
+        <option value="jpg">JPG</option>
+    </select>
+
     <div class="buttons">
         <button onclick="generarQR()">Generar</button>
         <button onclick="limpiar()">Limpiar</button>
@@ -88,10 +104,10 @@ button {
 </div>
 
 <script>
-let qr;
-
 function generarQR() {
     const texto = document.getElementById("texto").value;
+    const colorQR = document.getElementById("colorQR").value;
+    const colorFondo = document.getElementById("colorFondo").value;
 
     if (!texto) {
         alert("Ingresá un texto");
@@ -100,10 +116,12 @@ function generarQR() {
 
     document.getElementById("qrcode").innerHTML = "";
 
-    qr = new QRCode(document.getElementById("qrcode"), {
+    new QRCode(document.getElementById("qrcode"), {
         text: texto,
         width: 200,
-        height: 200
+        height: 200,
+        colorDark: colorQR,
+        colorLight: colorFondo
     });
 }
 
@@ -113,16 +131,40 @@ function limpiar() {
 }
 
 function descargar() {
+    const canvas = document.querySelector("#qrcode canvas");
     const img = document.querySelector("#qrcode img");
+    const formato = document.getElementById("formato").value;
 
-    if (!img) {
+    if (!canvas && !img) {
         alert("Primero generá un QR");
         return;
     }
 
+    let dataURL;
+
+    if (canvas) {
+        if (formato === "jpg") {
+            const tempCanvas = document.createElement("canvas");
+            const ctx = tempCanvas.getContext("2d");
+
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            ctx.drawImage(canvas, 0, 0);
+
+            dataURL = tempCanvas.toDataURL("image/jpeg", 1.0);
+        } else {
+            dataURL = canvas.toDataURL("image/png");
+        }
+    } else {
+        dataURL = img.src;
+    }
+
     const link = document.createElement("a");
-    link.href = img.src;
-    link.download = "codigoQR.png";
+    link.href = dataURL;
+    link.download = "codigoQR." + formato;
     link.click();
 }
 </script>

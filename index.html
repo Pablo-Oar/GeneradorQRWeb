@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador QR</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 500px;
+    margin: auto;
+    text-align: center;
+}
+
+/* Input */
+input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+/* Botones */
+.buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+button {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* QR */
+#qrcode {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    h2 {
+        font-size: 20px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Generador de Código QR</h2>
+
+    <input type="text" id="texto" placeholder="Ingresá texto o URL">
+
+    <div class="buttons">
+        <button onclick="generarQR()">Generar</button>
+        <button onclick="limpiar()">Limpiar</button>
+        <button onclick="descargar()">Exportar</button>
+    </div>
+
+    <div id="qrcode"></div>
+</div>
+
+<script>
+let qr;
+
+function generarQR() {
+    const texto = document.getElementById("texto").value;
+
+    if (!texto) {
+        alert("Ingresá un texto");
+        return;
+    }
+
+    document.getElementById("qrcode").innerHTML = "";
+
+    qr = new QRCode(document.getElementById("qrcode"), {
+        text: texto,
+        width: 200,
+        height: 200
+    });
+}
+
+function limpiar() {
+    document.getElementById("texto").value = "";
+    document.getElementById("qrcode").innerHTML = "";
+}
+
+function descargar() {
+    const img = document.querySelector("#qrcode img");
+
+    if (!img) {
+        alert("Primero generá un QR");
+        return;
+    }
+
+    const link = document.createElement("a");
+    link.href = img.src;
+    link.download = "codigoQR.png";
+    link.click();
+}
+</script>
+
+</body>
+</html>
